@@ -4,3 +4,5 @@ python-dotenv
 openai
 tavily-python
 pyaudio
+urllib3
+ssl
