@@ -41,7 +41,7 @@ from tts import speak
 from mongodb import save_message, get_recent_history
 from tavily_search import search_web
 from llm import ask_llm
-from intent import detect_intent
+from backend.intent import detect_intent
 from tools import handle_tool
 
 
