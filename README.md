@@ -1,83 +1,65 @@
-# Voice_agent (Azure OpenAI + SpeechRecognition + pyttsx3 + MongoDB + Tavily)
+# Voice_agent
 
-A real-time conversational voice assistant built using Azure OpenAI for language generation, SpeechRecognition for speech-to-text, pyttsx3 for offline text-to-speech, MongoDB for persistent conversation storage, and Tavily for real-time web search.
+Voice_agent is a multi-part project demonstrating a conversational assistant. It includes:
 
-This project demonstrates how to build a continuous, multi-turn, memory-enabled AI voice assistant with external search capabilities.
+- a Python backend with optional CLI voice assistant (microphone + offline TTS), persistent history, intent tools and web search
+- a FastAPI backend used by a React (Vite) frontend for a polished web chat UI
 
----
-
-## Features
-
-- Real-time voice input using microphone  
-- Multi-turn conversation memory  
-- Persistent chat history stored in MongoDB  
-- Azure OpenAI integration for intelligent responses  
-- Tavily API integration for real-time web search  
-- Offline text-to-speech using pyttsx3  
-- Automatic silence detection and restart listening  
-- Voice commands: `stop` or `exit` to terminate  
-- Environment variable configuration using dotenv  
+This repo contains both backend and frontend code so you can run either the full local voice assistant (CLI) or the web chat UI.
 
 ---
 
-## Tech Stack
+## Highlights (changes in this workspace)
 
-- Python  
-- Azure OpenAI  
-- SpeechRecognition  
-- pyttsx3 (offline TTS)  
-- MongoDB  
-- Tavily Search API  
-- python-dotenv  
+- Web frontend (Vite + React) with a professional, ChatGPT-like dark UI (avatars, typing indicator, timestamps, animated messages).
+- Frontend accepts voice input (speech-to-text) from the user — assistant replies are text-only in the web UI.
+- FastAPI endpoint at `POST /chat` that the frontend calls to get assistant responses.
 
 ---
 
+## Quick start — Frontend + Backend (recommended)
 
-## Installation
-
-### 1. Clone the Repository
-
-```bash
-git clone https://github.com/Harsh-1302-ust/Voice_agent.git
-cd Voice_agent
-```
-
-### 2. Create Virtual Environment (Recommended)
-
-```bash
-python -m venv venv
-venv\Scripts\activate
-```
-
-### 3. Install Dependencies
+1) Start the backend API (FastAPI). From project root:
 
 ```bash
 pip install -r requirements.txt
+# run backend API for the frontend
+uvicorn backend.api:app --reload --port 8000
 ```
 
-If installing manually:
+2) Start the frontend (from `frontend/`):
 
 ```bash
-pip install openai speechrecognition pyttsx3 python-dotenv pyaudio pymongo tavily-python
+cd frontend
+npm install   # only if dependencies are missing
+npm run dev
 ```
 
-For Windows (if PyAudio fails):
-
-```bash
-pip install pipwin
-pipwin install pyaudio
-```
+Open the dev server URL (usually `http://localhost:5173`) — the frontend will call the backend at `http://localhost:8000/chat`.
 
 ---
 
-## Environment Variables
+## Run the original CLI voice assistant (optional)
 
-Create a `.env` file in the root directory:
+The repository also includes a CLI-style voice assistant using `main.py`. This version listens from your microphone and uses local/offline TTS (`pyttsx3`) by default:
+
+```bash
+# activate virtualenv first
+python backend/main.py
+```
+
+Note: the CLI assistant and the FastAPI/web frontend are separate entry points.
+
+---
+
+## Environment variables
+
+Create a `.env` file in the repo root with the keys used by the backend (Azure, Mongo, Tavily, etc.):
 
 ```
 AZURE_OPENAI_API_KEY=your_api_key
 AZURE_OPENAI_ENDPOINT=https://your-endpoint.openai.azure.com/
-AZURE_OPENAI_API_VERSION=your_api_version
+AZURE_OPENAI_API_VERSION=2023-10-01
 AZURE_DEPLOYMENT=your_deployment_name
 
 MONGO_URI=your_mongodb_connection_string
@@ -85,81 +67,29 @@ MONGO_URI=your_mongodb_connection_string
 TAVILY_API_KEY=your_tavily_api_key
 ```
 
----
-
-## Running the Application
-
-```bash
-python main.py
-```
-
-The assistant will begin listening through your microphone.
+Adjust values to your environment. The FastAPI backend reads the same configuration when running `uvicorn backend.api:app`.
 
 ---
 
-## How It Works
+## Notes & UX decisions
 
-1. The microphone captures audio input.  
-2. SpeechRecognition converts speech to text.  
-3. User queries can optionally trigger Tavily web search.  
-4. Conversation history is stored in MongoDB.  
-5. The assistant sends context + search results to Azure OpenAI.  
-6. The assistant generates a response.  
-7. pyttsx3 converts the response into speech offline.  
-8. If silence is detected for 5 seconds, the assistant automatically resumes listening.  
+- The web UI intentionally keeps assistant replies as text (no TTS) while allowing users to speak to submit queries. This provides a clean, readable conversation flow and avoids overlapping speech playback in the browser.
+- The frontend shows a typing placeholder while the backend is processing; messages are animated and timestamped for a realistic chat feel.
+- CORS is enabled on the backend to allow the frontend to talk to `http://localhost:8000` during development.
 
 ---
 
-## Conversation Memory (MongoDB)
+## Troubleshooting
 
-Chat history is stored persistently in MongoDB using documents structured like:
-
-```
-{
-  "role": "user",
-  "content": "What is the capital of France?",
-  "timestamp": "2026-02-11T12:30:00"
-}
-```
-
-This enables:
-
-- Persistent memory across sessions  
-- Context-aware responses  
-- Scalable storage  
+- If the frontend cannot reach the backend, confirm the backend is running on port `8000` and no firewall blocks it.
+- If microphone access is blocked, allow the page to use your microphone in the browser prompt.
+- For PyAudio install issues on Windows, try `pip install pipwin` then `pipwin install pyaudio`.
 
 ---
 
-## Tavily Search Integration
+## Contributing
 
-Tavily is used for real-time web search when the assistant needs up-to-date information.
-
-Use cases:
-- Current events  
-- Latest technology updates  
-- Real-time data queries  
-
-Search results are injected into the LLM context before generating the final response.
-
----
-
-## Limitations
-
-- Google Speech Recognition requires internet connectivity.  
-- pyttsx3 voice quality depends on installed system voices.  
-- Performance depends on internet speed and API limits.  
-
----
-
-## Future Improvements
-
-- Wake word detection  
-- Streaming responses  
-- Async processing  
-- GUI-based interface  
-- Role-based memory filtering  
-- Background listening mode  
-- Deployment using Docker  
+Feel free to open issues or pull requests. If you want help wiring TTS back into the frontend (client-side audio playback), I can add an option to play assistant responses via `SpeechSynthesis` or a backend-generated audio stream.
 
 ---
 
