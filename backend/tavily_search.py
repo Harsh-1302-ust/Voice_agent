@@ -2,7 +2,7 @@ from tavily import TavilyClient
 from config import TAVILY_API_KEY
 
 tavily = TavilyClient(api_key=TAVILY_API_KEY)
-
+tavily.session.verify = False
 def search_web(query):
     results = tavily.search(query=query, max_results=3)
 

@@ -14,25 +14,19 @@ collection = db[os.getenv("MONGODB_COLLECTION")]
 SESSION_ID = os.getenv("SESSION_ID", "default_session")
 
 
-def save_message(role, content):
-    """
-    Save each message as a separate MongoDB document
-    """
+def save_message(role, content, session_id):
     collection.insert_one({
-        "session_id": SESSION_ID,
+        "session_id": session_id,
         "role": role,
         "content": content,
         "timestamp": datetime.utcnow()
     })
 
 
-def get_recent_history(limit=20):
-    """
-    Fetch last N messages for the session (oldest → newest)
-    """
+def get_recent_history(session_id, limit=20):
     cursor = (
         collection
-        .find({"session_id": SESSION_ID})
+        .find({"session_id": session_id})
         .sort("timestamp", -1)
         .limit(limit)
     )
